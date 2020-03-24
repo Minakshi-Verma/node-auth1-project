@@ -4,6 +4,7 @@ const router = require("express").Router();
 
 const Users = require("./auth-model")
 
+
 //--POST REQUEST to add user credentials to register----
 
 router.post('/register', (req, res)=>{
@@ -24,7 +25,47 @@ router.post('/register', (req, res)=>{
     })
 })
 
+//---POST REQUEST to login------
+//(you can login only if your credential matches with what you used at register)
 
+// router.post('/login', (req,res)=>{
+//     const {username, password} = req.body
+
+//     Users.findBy({username})
+//     .then(([user])=>{
+//      if(user && bcrypt.compareSync(password,user.password)){
+//        res.status(200).json({message:"Welcome back"})
+//      }else{
+//        res.status(401).json({ message: "invalid credentials" });
+//      }  
+//     })
+//     .catch(err=>json.send(err))   
+    
+// })
+
+//---POST REQUEST to login------
+//It will not only check user credentials but also add session to remember the client 
+
+router.post('/login', (req,res)=>{
+    const {username, password} = req.body
+
+    Users.findBy({username})
+    .then(([user])=>{
+     if(user && bcrypt.compareSync(password,user.password)){
+         //Add session and remember the client
+         req.session.user = {
+             id: user.id,
+             username: user.username
+         }
+       res.status(200).json({ hello: user.username})
+     }else{
+       res.status(401).json({ message: "invalid credentials" });
+     }  
+    })
+    .catch(err=>{res.status(500).json({message:"Can not find the user"})})    
+})
+
+//
 
 
 module.exports = router;
